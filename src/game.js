@@ -1,6 +1,6 @@
 Game = {
     map: {
-        width: 1024,
+        width: 1280,
         height: 768,
         box: {
             width: 100,
@@ -18,31 +18,56 @@ Game = {
         window.__db = window.__db || {}
         Crafty.scene('store', function() {
             var curr_index = 0
+                , max_index = 0
                 , r
                 , subCat
                 , row
                 , pc
                 , p
-                , c = 0;
+                , c = 0
+                , heading;
             var g = Crafty.init(Game.map.width, Game.map.height);
             g.bind('KeyDown', function(e) {
                 if (e.key === Crafty.keys['RIGHT_ARROW']) {
-                    alert('Right arrow!!');
+                    Crafty.canvas.context.clearRect(0, 0, Game.map.width, Game.map.height);
+                    pc = undefined, 
+                    r = undefined, 
+                    p = undefined,
+                    row = undefined, 
+                    subCat = undefined;
+                    c = 0;
+                    console.log(pc, r, p, row, subCat, c);
+                    preBuild(curr_index + 1);
+                    //console.log(window.__db.__categories, curr_index, max_index);
                 }
             });
+            heading = Crafty.e("2D, DOM, Text")
+                    .attr({ x: Game.map.width / 2, y: 20 })
+                    .text('')
+                    .textFont({size: '20px', weight: 'bold' })
+                    .textColor('#000000');
             Crafty.background("url('assets/img/shelf2.png')");
             Game.getCategories(function(data) {
                 if (data.success === true) {
                     window.__db.__categories = data.categories;
-                    row = window.__db.__categories[curr_index] || {};
-                    writeCategoryName(row);
-                    renderShelf(row);
+                    max_index = window.__db.__categories.length - 1;
+                    preBuild(0);
                 }
             });
             
+            function preBuild(k) {
+                if ( k > max_index)
+                    throw Error("Index out of bound");
+                
+                curr_index = k;
+                row = window.__db.__categories[k] || {};
+                writeCategoryName(row);
+                renderShelf(row);
+            }
+            
             function renderShelf(i) {
                 subCat = i.categories;
-                if ( subCat.length > 0) {
+                if ( subCat !== null && subCat.length > 0) {
                     // Nested. Render row shelf.
                     for (r in subCat) {
                         renderShelfRow(subCat[r], parseInt(r)+1);
@@ -57,13 +82,12 @@ Game = {
                     .text(i.name)
                     .textFont({size: '20px', weight: 'bold' })
                     .textColor('#000000');
-            
                 Game.getProducts(i, function(data) {
                     c++;
                     console.log(c);
                     if ( data.success === true) {
                         for (p in data.products) {
-                            var box = Crafty.e('2D, DOM, Image').image('assets/img/box_100x100.png')
+                            Crafty.e('2D, Canvas, Image').image('assets/img/box_100x100.png')
                             .attr({
                                 x: 50 * (p * 2),
                                 y: 75 * (c === 1 ? 1 :  c * 1.45),
@@ -72,24 +96,11 @@ Game = {
                             });
                         }
                     }
-                    /*
-                     * 
-        .bind('KeyDown', function(e) {
-            if (e.key === Crafty.keys['RIGHT_ARROW']) {
-                alert('Right arrow!!');
-            }
-        })
-                     */
-                    
                 });
             }
             
             function writeCategoryName(i) {
-                Crafty.e("2D, Canvas, Text")
-                    .attr({ x: Game.map.width / 2, y: 40 })
-                    .text(i.name)
-                    .textFont({size: '20px', weight: 'bold' })
-                    .textColor('#000000');
+                heading.text(i.name);
             }
             
         });
