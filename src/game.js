@@ -29,16 +29,19 @@ Game = {
             var g = Crafty.init(Game.map.width, Game.map.height);
             g.bind('KeyDown', function(e) {
                 if (e.key === Crafty.keys['RIGHT_ARROW']) {
-                    Crafty.canvas.context.clearRect(0, 0, Game.map.width, Game.map.height);
-                    pc = undefined, 
-                    r = undefined, 
-                    p = undefined,
-                    row = undefined, 
-                    subCat = undefined;
-                    c = 0;
-                    console.log(pc, r, p, row, subCat, c);
+                    if (typeof window.__db.__categories[curr_index + 1] === 'undefined') {
+                        alert('No more items on shelf!');
+                        return false;
+                    }
+                    resetLayout();
                     preBuild(curr_index + 1);
-                    //console.log(window.__db.__categories, curr_index, max_index);
+                } else if (e.key === Crafty.keys['LEFT_ARROW']) {
+                    if (typeof window.__db.__categories[curr_index - 1] === 'undefined') {
+                        alert('No more items on shelf!');
+                        return false;
+                    }
+                    resetLayout();
+                    preBuild(curr_index - 1);
                 }
             });
             heading = Crafty.e("2D, DOM, Text")
@@ -54,11 +57,16 @@ Game = {
                     preBuild(0);
                 }
             });
-            
+            function resetLayout() {
+                Crafty.canvas.context.clearRect(0, 0, Game.map.width, Game.map.height);
+                    pc = undefined, 
+                    r = undefined, 
+                    p = undefined,
+                    row = undefined, 
+                    subCat = undefined;
+                    c = 0;
+            }
             function preBuild(k) {
-                if ( k > max_index)
-                    throw Error("Index out of bound");
-                
                 curr_index = k;
                 row = window.__db.__categories[k] || {};
                 writeCategoryName(row);
@@ -76,7 +84,7 @@ Game = {
             }
             
             function renderShelfRow(i, inc) {
-                pc = inc === 1 ? 0 : 80;
+                pc = inc === 1 ? 0 : 70;
                 Crafty.e("2D, Canvas, Text")
                     .attr({ x: 60, y: (Game.map.row.height * inc) + pc })
                     .text(i.name)
@@ -84,7 +92,6 @@ Game = {
                     .textColor('#000000');
                 Game.getProducts(i, function(data) {
                     c++;
-                    console.log(c);
                     if ( data.success === true) {
                         for (p in data.products) {
                             Crafty.e('2D, Canvas, Image').image('assets/img/box_100x100.png')
