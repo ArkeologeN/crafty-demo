@@ -1,3 +1,4 @@
+var spin = Spin();
 Game = {
     map: {
         width: 1280,
@@ -14,7 +15,7 @@ Game = {
             height: 70
         }
     },
-    start: function() {
+    start: function() {;
         window.__db = window.__db || {}
         Crafty.scene('store', function() {
             var curr_index = 0
@@ -26,6 +27,9 @@ Game = {
                 , p
                 , c = 0
                 , heading;
+            
+            spin.init('spinner');
+            spin.start();
             var g = Crafty.init(Game.map.width, Game.map.height);
             g.bind('KeyDown', function(e) {
                 if (e.key === Crafty.keys['RIGHT_ARROW']) {
@@ -129,11 +133,19 @@ Game = {
         $.ajax({
             url: Game.map.request.url_get_products+"&category="+o.category_id,
             async: true,
+            beforeSend: function() {
+                spin.start();
+            },
             success: function(data) {
                 cb(data);
             },
             error: function() {
                 alert("unable to get products!");
+            },
+            complete: function() {
+                setTimeout(function() {
+                    spin.stop();
+                }, 1000);
             }
         });
     }
