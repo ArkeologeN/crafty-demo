@@ -1,8 +1,8 @@
 var spin = Spin();
 Game = {
     map: {
-        width: 700,
-        height: 569,
+        width: 1280,
+        height: 768,
         box: {
             width: 100,
             height: 100
@@ -28,13 +28,8 @@ Game = {
                 , c = 0
                 , heading;
             
-            // Initialize Spinner
             spin.init('spinner');
-            
-            // Start loader.
             spin.start();
-            
-            // Initialize Scene
             var g = Crafty.init(Game.map.width, Game.map.height);
             g.bind('KeyDown', function(e) {
                 if (e.key === Crafty.keys['RIGHT_ARROW']) {
@@ -53,18 +48,12 @@ Game = {
                     preBuild(curr_index - 1);
                 }
             });
-            
-            // Heading text.
             heading = Crafty.e("2D, DOM, Text")
                     .attr({ x: Game.map.width / 2, y: 20 })
                     .text('')
                     .textFont({size: '20px', weight: 'bold' })
                     .textColor('#000000');
-            
-            // Background Image.
-            Crafty.background("url('assets/img/shelf4.jpg')");
-            
-            // Load categories
+            Crafty.background("url('assets/img/shelf2.png')");
             Game.getCategories(function(data) {
                 if (data.success === true) {
                     window.__db.__categories = data.categories;
@@ -92,14 +81,9 @@ Game = {
                 subCat = i.categories;
                 if ( subCat !== null && subCat.length > 0) {
                     // Nested. Render row shelf.
-                    if (typeof subCat[0] !== 'undefined') {
-                        renderShelfRow(subCat[0], parseInt(r)+1);
-                    }
-                    /*
-                     * for (r in subCat) {
+                    for (r in subCat) {
                         renderShelfRow(subCat[r], parseInt(r)+1);
                     }
-                     */
                 }
             }
             
@@ -111,20 +95,16 @@ Game = {
                     .textFont({size: '20px', weight: 'bold' })
                     .textColor('#000000');
                 Game.getProducts(i, function(data) {
-                    
+                    c++;
                     if ( data.success === true) {
-                        console.log(data.products.length);
                         for (p in data.products) {
-                            ++c;
                             Crafty.e('2D, Canvas, Image').image('assets/img/box_100x100.png')
                             .attr({
-                                x: 30 * (p * 2),
-                                y: 95 + (c === 1 ? 1 :  c * 2),
+                                x: 50 * (p * 2),
+                                y: 75 * (c === 1 ? 1 :  c * 1.45),
                                 w: Game.map.box.width,
                                 h: Game.map.box.height
                             });
-                            console.log(c);
-                            
                         }
                     }
                 });
