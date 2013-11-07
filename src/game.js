@@ -1,4 +1,10 @@
-var spin = Spin();
+var spin = Spin()
+    , Game;
+var curr_index = 0
+    , max_index = 0
+    , r, subCat, row
+    , pc, p, c = 0
+    , heading, product, shelf;
 Game = {
     map: {
         width: 700,
@@ -18,15 +24,6 @@ Game = {
     start: function() {;
         window.__db = window.__db || {}
         Crafty.scene('store', function() {
-            var curr_index = 0
-                , max_index = 0
-                , r
-                , subCat
-                , row
-                , pc
-                , p
-                , c = 0
-                , heading;
             
             // Initialize Spinner
             spin.init('spinner');
@@ -36,6 +33,10 @@ Game = {
             
             // Initialize Scene
             var g = Crafty.init(Game.map.width, Game.map.height);
+            
+            shelf = Crafty.e('2D, Canvas, Tween, Image').image('assets/img/shelf4.jpg')
+                .attr({w: Game.map.width, h: Game.map.height});
+        
             g.bind('KeyDown', function(e) {
                 if (e.key === Crafty.keys['RIGHT_ARROW']) {
                     if (typeof window.__db.__categories[curr_index + 1] === 'undefined') {
@@ -62,7 +63,7 @@ Game = {
                     .textColor('#000000');
             
             // Background Image.
-            Crafty.background("url('assets/img/shelf4.jpg')");
+            //Crafty.background("url('assets/img/shelf4.jpg')");
             
             // Load categories
             Game.getCategories(function(data) {
@@ -74,6 +75,7 @@ Game = {
             });
             function resetLayout() {
                 Crafty.canvas.context.clearRect(0, 0, Game.map.width, Game.map.height);
+                $('.img-tooltip').remove();
                     pc = undefined, 
                     r = undefined, 
                     p = undefined,
@@ -113,19 +115,19 @@ Game = {
                 Game.getProducts(i, function(data) {
                     
                     if ( data.success === true) {
-                        console.log(data.products.length);
                         for (p in data.products) {
                             ++c;
-                            Crafty.e('2D, Canvas, Image').image('assets/img/box_100x100.png')
-                            .attr({
-                                x: 30 * (p * 2),
-                                y: 95 + (c === 1 ? 1 :  c * 2),
-                                w: Game.map.box.width,
-                                h: Game.map.box.height
-                            });
-                            console.log(c);
-                            
+                            product = data.products[p];
+                            Crafty.e("DOM, HTML")
+                                .attr({
+                                    x: 30 * (p * 2),
+                                    y: 95 + (c === 1 ? 1 :  c * 2),
+                                    w: Game.map.box.width,
+                                    h: Game.map.box.height
+                                })
+                                .replace('<img rel="tooltip" class="img-tooltip" src="assets/img/box_100x100.png" title="'+product.name +'" data-content="My content here." />');
                         }
+                        $('.img-tooltip').tooltip();
                     }
                 });
             }
@@ -155,6 +157,7 @@ Game = {
             async: true,
             beforeSend: function() {
                 spin.start();
+                shelf.alpha = 0.6;
             },
             success: function(data) {
                 cb(data);
@@ -165,6 +168,7 @@ Game = {
             complete: function() {
                 setTimeout(function() {
                     spin.stop();
+                    shelf.alpha = 1;
                 }, 1000);
             }
         });
