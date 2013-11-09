@@ -92,16 +92,20 @@ Game = {
             
             function renderShelf(i) {
                 subCat = i.categories;
+                console.log(subCat);
                 if ( subCat !== null && subCat.length > 0) {
                     // Nested. Render row shelf.
                     if (typeof subCat[0] !== 'undefined') {
                         renderShelfRow(subCat[0], parseInt(r)+1);
+                        
                     }
                     /*
                      * for (r in subCat) {
                         renderShelfRow(subCat[r], parseInt(r)+1);
                     }
                      */
+                } else {
+                    console.log("No subcategories found!");
                 }
             }
             
@@ -157,7 +161,7 @@ Game = {
             async: true,
             beforeSend: function() {
                 spin.start();
-                shelf.alpha = 0.6;
+                shelf.tween({w: 500}, 10);
             },
             success: function(data) {
                 cb(data);
@@ -166,10 +170,8 @@ Game = {
                 alert("unable to get products!");
             },
             complete: function() {
-                setTimeout(function() {
-                    spin.stop();
-                    shelf.alpha = 1;
-                }, 1000);
+                spin.stop();
+                shelf.tween({w: 700}, 10);
             }
         });
     }
